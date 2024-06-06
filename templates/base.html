@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            padding-top: 0px !important;
+        }
+        .navbar {
+            position: sticky; /* Зафіксувати панель навігації у верхній частині вікна */
+            top: 0; /* Розташувати панель навігації зверху */
+            left: 0; /* Розташувати панель навігації зліва */
+            width: 100%; /* Розтягнути панель навігації на всю ширину вікна */
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0px;
+            border-bottom: 2px solid #dee2e6;
+            font-family: sans-serif; /* Додайте шрифт за вашим вибором */
+            height: 60px; /* Add a fixed height to the navbar */
+            flex-wrap: nowrap; /* Prevent links from wrapping to a new line */
+            overflow: hidden;
+        }
+        .navbar li {
+            list-style-type: none;
+        }
+          
+          .nav-link {
+            color: #333; /* Темний сірий для тексту */
+            text-decoration: none; /* Видалення підкреслення */
+            padding: 0.5rem 1rem; /* Adjust padding to fit within the fixed height */
+            transition: color 0.3s ease; /* Додати плавний перехід при наведенні курсору */
+            flex: 1; /* Make links take equal space horizontally */
+            text-align: center; /* Center the link text */
+          }
+          
+          .nav-link:hover {
+            color: #007bff; /* Синій при наведенні курсору */
+          }
+     </style>
+     <script>
+        // When the user scrolls the page, execute myFunction
+        window.onscroll = function() {myFunction()};
+
+        // Get the navbar
+        var navbar = document.getElementById("navbar");
+
+        // Get the offset position of the navbar
+        var sticky = navbar.offsetTop;
+
+        // Add the sticky class to the navbar when you reach its scroll position. Remove "sticky" when you leave the scroll position
+        function myFunction() {
+            if (window.pageYOffset >= sticky) {
+                navbar.classList.add("sticky")
+            } else {
+                navbar.classList.remove("sticky");
+            }
+        }
+    </script>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    <nav class="navbar" id='navbar'>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'chat' %}">Main</a>
+            </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'new_chat' %}">New chat</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'user_profile' %}">Profile: {{ user.username }}</a>
+            </li>
+            <li class="nav-item">
+                <form action="{% url 'logout' %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="nav-link">Logout</button>
+                </form>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+        {% endif %}
+    </nav>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

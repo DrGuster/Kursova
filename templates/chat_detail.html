@@ -1,0 +1,299 @@
+{% extends 'base.html' %}
+{% block head %}
+<style>
+    /* Reset some styles */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Set some basic styles for the body */
+    body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        background-color: #f4f4f4;
+        overflow-y: hidden;
+    }
+
+    /* Style the container */
+   .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Style the header */
+    header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #ccc;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: #333;
+    }
+
+    /* Style the participants list */
+    ul.participants {
+        list-style: none;
+        display: flex;
+        flex-wrap: wrap;
+        margin: 1rem 0;
+    }
+
+    ul.participants li {
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #ddd;
+        border-radius: 5px;
+    }
+
+    /* Style the form to add a user */
+    form.add-user {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    input[type=text], select {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input[type=submit] {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      
+      input[type=submit]:hover {
+        background-color: #45a049;
+      }
+
+      button{
+        background-color: #04AA6D;
+        border: none;
+        color: white;
+        padding: 16px 32px;
+        text-decoration: none;
+        margin: 4px 2px;
+        cursor: pointer;
+      }
+
+    form.add-user button {
+        padding: 0.5rem 1rem;
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    form.add-user button:hover {
+        background-color: #45a049;
+    }
+
+    /* Style the messages list */
+    ul.messages {
+        list-style: none;
+        margin: 2rem 0;
+    }
+    ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+    ul.messages li {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    ul.messages li:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    /* Style the form to send a message */
+    form.send-message {
+        display: flex;
+        align-items: center;
+    }
+
+    form.send-message input[type="text"] {
+        flex-grow: 1;
+        padding: 0.5rem;
+        margin-right: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    form.send-message button:hover {
+        background-color: #45a049;
+    }
+    #datablock {
+        width: 20%;
+        height: 100vh; /* make it full height */
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        float: left; /* make it float left */
+    }
+    
+    #messageblock {
+        width: 80%;
+        height: 90vh; /* make it full height */
+        margin: 0;
+        padding: 20px;
+        background-color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        float: right; /* make it float right */
+        overflow-y: auto;
+    }
+    #messageblock ul {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+    .user-message {
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background-color: #f8f9fa; /* Світло-сірий фон */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Тінь для візуального ефекту */
+    }
+    .user-message .username {
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+    .from-me {
+        background-color: #e6f0f7; /* Блакитний фон для повідомлень від вас */
+        text-align: left; /* Вирівнювання тексту праворуч */
+    }
+      
+    .from-other {
+        background-color: #fff; /* Білий фон для повідомлень від інших */
+        text-align: left; /* Вирівнювання тексту ліворуч */
+    }
+</style>
+<script>
+    const roomName = '{{ chat.name }}';
+
+    const chatSocket = new WebSocket(
+        'ws://' + 
+        window.location.host + 
+        '/ws/chat_detail/' + 
+        roomName + 
+        '/'
+    );
+    console.log('chatSocket: ' + chatSocket);
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const message = data['message'];
+    
+        // Update messages in real-time
+        const messagesList = document.getElementById('messagesul');
+    
+        const newMessage = document.createElement('li');
+        newMessage.className = 'user-message from-other';
+    
+        const usernameSpan = document.createElement('span');
+        usernameSpan.className = 'username';
+        usernameSpan.textContent = message.sender;
+        newMessage.appendChild(usernameSpan);
+    
+        newMessage.appendChild(document.createTextNode(`: ${message.text}`));
+    
+        messagesList.appendChild(newMessage);
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+</script>
+
+
+{% endblock %}
+{% block content %}
+<div id='allblock'>
+    <div id='datablock'>
+        <h1>Name: {{ chat.name }}</h1>
+        <p>Description: {{ chat.description }}</p>
+        <p>Створений: {{ chat.creator.username }}</p>
+        <h2>Учасники:</h2>
+        <ul>
+            {% for participant in chat.participants.all %}
+                <li>{{ participant.username }}</li>
+            {% endfor %}
+        </ul>
+        <form method="post">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Enter the username">
+            <button type="submit">Add user</button>
+        </form>
+    </div>
+    <div id='messageblock'>
+        <h2>Повідомлення:</h2>
+        <ul id='messagesul'>
+        {% for message in chat.messages.all %}
+            {% if message.user == user %}
+            <li class='user-message from-me'>
+                <span class='username'>{{ message.user.username }}</span>: {{ message.text }}
+            </li>
+            {% else %}
+            <li class='user-message from-other'>
+                <span class='username'>{{ message.user.username }}</span>: {{ message.text }}
+            </li>
+            {% endif %}
+            
+        {% endfor %}
+        </ul>
+        <form method="post" id="message-form">
+            {% csrf_token %}
+            <input type="text" name="text" placeholder="Enter your message..." id='message-input'>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+<script>
+    const messageInputDom = document.getElementById('message-input');
+    const messageForm = document.getElementById('message-form');
+    const username = "{{ user.username }}";
+
+    messageForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const messageInput = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+            'message': messageInput,
+            'username': username
+        }));
+
+        messageInputDom.value = '';
+    });
+</script>
+{% endblock %}

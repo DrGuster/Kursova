@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block head %}
+
+<script>
+    $(document).ready(function() {
+        $(".chat-link").click(function() {
+          $(this).closest('.chat-item').find(".chat-info").toggle();
+        });
+      });
+</script>
+<style>
+    /* General styling for chat items */
+.chat-item {
+    display: flex;
+    
+  margin-bottom: 20px; /* Add some spacing between chat items */
+  padding: 20px; /* Add padding for content within each item */
+  border: 1px solid #ccc; /* Add a subtle border */
+  border-radius: 5px; /* Add rounded corners for a softer look */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+/* Styling for chat headers */
+.chat-header {
+  padding: 10px 15px;
+}
+
+/* Styling for chat names (chat-link) */
+.chat-link {
+    padding: 20px; /* Add padding for content */
+    border: 1px solid #ccc; /* Add a subtle border */
+    border-radius: 5px; /* Add rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit text color from parent */
+    cursor: pointer; /* Indicate clickable link */
+}
+
+
+/* Styling for chat information (hidden initially) */
+.chat-info {
+  display: none; /* Initially hide chat information */
+  padding: 15px;
+}
+
+/* Show chat information when its chat name is clicked */
+.chat-link.active + .chat-info {
+  display: block;
+}
+
+/* Styling for chat short description */
+.chat-info p:first-child {
+  font-weight: bold; /* Make short description stand out */
+}
+
+/* Add some spacing between paragraphs */
+.chat-info p {
+  margin-bottom: 10px;
+}
+
+</style>
+{% endblock %}
+{% block content %}
+<h1>Chats</h1>
+
+<ul>
+    {% for chat in chats %}
+    <div class="chat-item">
+      <div class="chat-header">
+        <h2>
+          <a href="#" class="chat-link">{{ chat.name }}</a>
+          <a href="{% url 'chat_detail' chat.id %}">
+            {{ chat.name }}
+          </a>
+        </h2>
+      </div>
+      <div class="chat-info" style="display: none;">  
+        <p>{{ chat.short_description }}</p>
+        <p>{{ chat.description }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</ul>
+{% endblock %}

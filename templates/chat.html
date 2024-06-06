@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Chat</h1>
+  <ul>
+    {% for message in messages %}
+      <li>{{ message.user }}: {{ message.message }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
